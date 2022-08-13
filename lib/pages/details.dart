@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:ecommerce/model/item.dart';
 import 'package:ecommerce/shared/ProductsAndPrice.dart';
 import 'package:ecommerce/shared/colors.dart';
