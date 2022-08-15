@@ -298,12 +298,17 @@ class _RegisterState extends State<Register> {
                       height: 33,
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          register();
-                        } else {
-                          showSnackBar(context, "ERROR");
-                        }
+                      onPressed: () async {
+                         if (_formKey.currentState!.validate()) {
+                        await register();
+                        if (!mounted) return;
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => Login()),
+                        );
+                      } else {
+                        showSnackBar(context, "ERROR");
+                      }
                       },
                       child: isLoading
                           ? CircularProgressIndicator(
@@ -333,7 +338,7 @@ class _RegisterState extends State<Register> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const Login()),
+                                    builder: (context) =>  Login()),
                               );
                             },
                             child: Text('sign in',

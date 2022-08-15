@@ -3,9 +3,11 @@
 import 'package:ecommerce/model/item.dart';
 import 'package:ecommerce/pages/CheckOut.dart';
 import 'package:ecommerce/pages/details.dart';
+import 'package:ecommerce/pages/login.dart';
 import 'package:ecommerce/provider/cart.dart';
 import 'package:ecommerce/shared/ProductsAndPrice.dart';
 import 'package:ecommerce/shared/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -74,7 +76,14 @@ class Home extends StatelessWidget {
                 ListTile(
                     title: const Text("Logout"),
                     leading: const Icon(Icons.exit_to_app),
-                    onTap: () {}),
+                    onTap: () async {
+                      await FirebaseAuth.instance.signOut();
+                      
+                        Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => Login()),
+                      );
+                    }),
               ],
             ),
             Container(
