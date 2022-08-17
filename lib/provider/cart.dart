@@ -25,3 +25,4 @@ class Cart with ChangeNotifier {
     return selectedProducts.length;
   }
 }
+

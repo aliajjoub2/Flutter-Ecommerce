@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'pages/home.dart';
 import 'pages/login.dart';
 import 'pages/verify_email.dart';
+import 'provider/google_signin.dart';
 import 'shared/snackbar.dart';
 
 void main() async {
@@ -31,7 +32,7 @@ void main() async {
   } else {
     await Firebase.initializeApp();
   }
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -39,30 +40,35 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) {
-        return Cart();
-      },
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home:  StreamBuilder(
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                    child: CircularProgressIndicator(
-                  color: Colors.white,
-                ));
-              } else if (snapshot.hasError) {
-                return showSnackBar(context, "Something went wrong");
-              } else if (snapshot.hasData) {
-                return  VerifyEmailPage(); // home() OR verify email
-              } else {
-                return Login();
-              }
-            },
-          )
-      ),
+    return MultiProvider(
+    providers: [
+    ChangeNotifierProvider(create: (context) {
+    return Cart();
+    }),
+    ChangeNotifierProvider(create: (context) {
+     return GoogleSignInProvider();
+    }),
+    ],
+    child: MaterialApp(
+    title: "myApp",
+    debugShowCheckedModeBanner: false,
+    home: StreamBuilder(
+    stream: FirebaseAuth.instance.authStateChanges(),
+    builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+    return const Center(
+    child: CircularProgressIndicator(
+    color: Colors.white,
+      ));
+    } else if (snapshot.hasError) {
+    return showSnackBar(context, "Something went wrong");
+    } else if (snapshot.hasData) {
+    return const Home(); // home() OR VerifyEmailPage()
+    } else {
+    return Login();
+    }
+    },
+    )),
     );
   }
 }

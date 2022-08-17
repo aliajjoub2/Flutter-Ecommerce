@@ -11,6 +11,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'profile_page.dart';
+
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -70,9 +72,17 @@ class Home extends StatelessWidget {
                       );
                     }),
                 ListTile(
-                    title: const Text("About"),
+                    title: const Text("my Profile"),
                     leading: const Icon(Icons.help_center),
-                    onTap: () {}),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>  ProfilePage(),
+                        ),
+                      );
+
+                    }),
                 ListTile(
                     title: const Text("Logout"),
                     leading: const Icon(Icons.exit_to_app),

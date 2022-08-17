@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/pages/login.dart';
 import 'package:ecommerce/shared/colors.dart';
 import 'package:ecommerce/shared/decorationtextfield.dart';
@@ -7,6 +8,9 @@ import 'package:ecommerce/shared/snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
 class Register extends StatefulWidget {
   Register({Key? key}) : super(key: key);
 
@@ -15,19 +19,25 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  bool isVisable = true;
+  bool isVisable = true; // variable show password
 
-  final _formKey = GlobalKey<FormState>();
-  bool isLoading = false;
+  final _formKey = GlobalKey<FormState>(); // variable for form
+  bool isLoading = false; // variable show CircularProgressIndicator or Register
+  // start controller for textfield
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final usernameController = TextEditingController();
+  final ageController = TextEditingController();
+  final titleController = TextEditingController();
 
+// start variables validation
   bool isPassword8Char = false;
   bool isPasswordHas1Number = false;
   bool hasUppercase = false;
   bool hasLowercase = false;
   bool hasSpecialCharacters = false;
 
+// start password validation function 
   onPasswordChanged(String password) {
     isPassword8Char = false;
     isPasswordHas1Number = false;
@@ -59,7 +69,7 @@ class _RegisterState extends State<Register> {
 
     });
   }
-
+// start register function 
   register() async {
     setState(() {
       isLoading = true;
@@ -71,6 +81,24 @@ class _RegisterState extends State<Register> {
         email: emailController.text,
         password: passwordController.text,
       );
+
+       print(credential.user!.uid);
+
+      // start insert in fire store
+      CollectionReference users =
+          FirebaseFirestore.instance.collection('userSSS');
+
+      users
+          .doc(credential.user!.uid)
+          .set({
+            'username': usernameController.text,
+            'age': ageController.text,
+            "title": titleController.text,
+            "email": emailController.text,
+            "pass": passwordController.text,
+          })
+          .then((value) => print("User Added"))
+          .catchError((error) => print("Failed to add user: $error"));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         showSnackBar(context, "The password provided is too weak.");
@@ -93,6 +121,10 @@ class _RegisterState extends State<Register> {
     // TODO: implement dispose
     emailController.dispose();
     passwordController.dispose();
+
+    usernameController.dispose();
+    ageController.dispose();
+    titleController.dispose();
     super.dispose();
   }
 
@@ -110,6 +142,7 @@ class _RegisterState extends State<Register> {
                 child: Column(
                   children: [
                     TextField(
+                      controller: usernameController,
                         keyboardType: TextInputType.text,
                         obscureText: false,
                         decoration: decorationTextfield.copyWith(
@@ -118,6 +151,29 @@ class _RegisterState extends State<Register> {
                     const SizedBox(
                       height: 33,
                     ),
+                            const SizedBox(
+                    height: 22,
+                  ),
+                  TextFormField(
+                      controller: ageController,
+                      keyboardType: TextInputType.number,
+                      obscureText: false,
+                      decoration: decorationTextfield.copyWith(
+                          hintText: "Enter Your age : ",
+                          suffixIcon: Icon(Icons.pest_control_rodent))),
+                  const SizedBox(
+                    height: 22,
+                  ),
+                  TextFormField(
+                      controller: titleController,
+                      keyboardType: TextInputType.text,
+                      obscureText: false,
+                      decoration: decorationTextfield.copyWith(
+                          hintText: "Enter Your title : ",
+                          suffixIcon: Icon(Icons.person_outline))),
+                  const SizedBox(
+                    height: 22,
+                  ),
                     TextFormField(
                         // we return "null" when something is valid
                         validator: (email) {
@@ -167,11 +223,6 @@ class _RegisterState extends State<Register> {
                     Row(
                       children: [
                         Container(
-                          child: Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 15,
-                          ),
                           height: 20,
                           width: 20,
                           decoration: BoxDecoration(
@@ -180,6 +231,11 @@ class _RegisterState extends State<Register> {
                                 isPassword8Char ? Colors.green : Colors.white,
                             border: Border.all(
                                 color: Color.fromARGB(255, 189, 189, 189)),
+                          ),
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 15,
                           ),
                         ),
                         SizedBox(
@@ -194,11 +250,6 @@ class _RegisterState extends State<Register> {
                     Row(
                       children: [
                         Container(
-                          child: Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 15,
-                          ),
                           height: 20,
                           width: 20,
                           decoration: BoxDecoration(
@@ -208,6 +259,11 @@ class _RegisterState extends State<Register> {
                                 : Colors.white,
                             border: Border.all(
                                 color: Color.fromARGB(255, 189, 189, 189)),
+                          ),
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 15,
                           ),
                         ),
                         SizedBox(
@@ -222,11 +278,6 @@ class _RegisterState extends State<Register> {
                     Row(
                       children: [
                         Container(
-                          child: Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 15,
-                          ),
                           height: 20,
                           width: 20,
                           decoration: BoxDecoration(
@@ -234,6 +285,11 @@ class _RegisterState extends State<Register> {
                             color: hasUppercase? Colors.green:  Colors.white,
                             border: Border.all(
                                 color: Color.fromARGB(255, 189, 189, 189)),
+                          ),
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 15,
                           ),
                         ),
                         SizedBox(
@@ -248,11 +304,6 @@ class _RegisterState extends State<Register> {
                     Row(
                       children: [
                         Container(
-                          child: Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 15,
-                          ),
                           height: 20,
                           width: 20,
                           decoration: BoxDecoration(
@@ -260,6 +311,11 @@ class _RegisterState extends State<Register> {
                             color: hasLowercase? Colors.green : Colors.white,
                             border: Border.all(
                                 color: Color.fromARGB(255, 189, 189, 189)),
+                          ),
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 15,
                           ),
                         ),
                         SizedBox(
@@ -274,11 +330,6 @@ class _RegisterState extends State<Register> {
                     Row(
                       children: [
                         Container(
-                          child: Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 15,
-                          ),
                           height: 20,
                           width: 20,
                           decoration: BoxDecoration(
@@ -286,6 +337,11 @@ class _RegisterState extends State<Register> {
                             color: hasSpecialCharacters? Colors.green :  Colors.white,
                             border: Border.all(
                                 color: Color.fromARGB(255, 189, 189, 189)),
+                          ),
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 15,
                           ),
                         ),
                         SizedBox(
@@ -310,6 +366,12 @@ class _RegisterState extends State<Register> {
                         showSnackBar(context, "ERROR");
                       }
                       },
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(BTNgreen),
+                        padding: MaterialStateProperty.all(EdgeInsets.all(12)),
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8))),
+                      ),
                       child: isLoading
                           ? CircularProgressIndicator(
                               color: Colors.white,
@@ -318,12 +380,6 @@ class _RegisterState extends State<Register> {
                               "Register",
                               style: TextStyle(fontSize: 19),
                             ),
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(BTNgreen),
-                        padding: MaterialStateProperty.all(EdgeInsets.all(12)),
-                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8))),
-                      ),
                     ),
                     const SizedBox(
                       height: 33,
