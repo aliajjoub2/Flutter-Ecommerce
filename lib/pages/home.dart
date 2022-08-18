@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../shared/user_img_from_firestore.dart';
 import 'profile_page.dart';
 
 class Home extends StatelessWidget {
@@ -37,9 +38,7 @@ class Home extends StatelessWidget {
                         image: AssetImage("assets/img/1.webp"),
                         fit: BoxFit.cover),
                   ),
-                  currentAccountPicture: CircleAvatar(
-                      radius: 22,
-                      backgroundImage: AssetImage("assets/img/2.webp")),
+                  currentAccountPicture: ImgUser(),
                   accountEmail: Text("ali@yahoo.com",
                       style: TextStyle(
                         color: Color.fromARGB(255, 13, 13, 13),

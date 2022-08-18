@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/pages/login.dart';
 import 'package:ecommerce/shared/colors.dart';
@@ -10,9 +12,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart' show basename;
 
 class Register extends StatefulWidget {
-  Register({Key? key}) : super(key: key);
+  const Register({Key? key}) : super(key: key);
 
   @override
   State<Register> createState() => _RegisterState();
@@ -36,6 +40,93 @@ class _RegisterState extends State<Register> {
   bool hasUppercase = false;
   bool hasLowercase = false;
   bool hasSpecialCharacters = false;
+
+// path and name of image for 'image picker package'
+File? imgPath;
+String? imgName;
+
+// start function Uplowd image with variable source defined in function showmodel
+  uploadImage2Screen(ImageSource source) async {
+    final pickedImg = await ImagePicker().pickImage(source: source);
+    try {
+      if (pickedImg != null) {
+        setState(() {
+          imgPath = File(pickedImg.path);
+          imgName = basename(pickedImg.path);
+          int random = Random().nextInt(9999999);
+          imgName = "$random$imgName";
+          print(imgName);
+        });
+      } else {
+        print("NO img selected");
+      }
+    } catch (e) {
+      print("Error => $e");
+    }
+
+    if (!mounted) return;
+    Navigator.pop(context);
+  }
+// function to define upload image from Camera or gallery
+  showmodel() {
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(22),
+          height: 170,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  await uploadImage2Screen(ImageSource.camera);
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.camera,
+                      size: 30,
+                    ),
+                    SizedBox(
+                      width: 11,
+                    ),
+                    Text(
+                      "From Camera",
+                      style: TextStyle(fontSize: 20),
+                    )
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 22,
+              ),
+              GestureDetector(
+                onTap: () {
+                  uploadImage2Screen(ImageSource.gallery);
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.photo_outlined,
+                      size: 30,
+                    ),
+                    SizedBox(
+                      width: 11,
+                    ),
+                    Text(
+                      "From Gallery",
+                      style: TextStyle(fontSize: 20),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
 // start password validation function 
   onPasswordChanged(String password) {
@@ -69,6 +160,7 @@ class _RegisterState extends State<Register> {
 
     });
   }
+
 // start register function 
   register() async {
     setState(() {
@@ -84,6 +176,13 @@ class _RegisterState extends State<Register> {
 
        print(credential.user!.uid);
 
+       // Upload image to firebase storage
+      final storageRef = FirebaseStorage.instance.ref("users-imgs/$imgName");
+      await storageRef.putFile(imgPath!);
+      String urll = await storageRef.getDownloadURL();
+
+      print(credential.user!.uid);
+
       // start insert in fire store
       CollectionReference users =
           FirebaseFirestore.instance.collection('userSSS');
@@ -91,6 +190,7 @@ class _RegisterState extends State<Register> {
       users
           .doc(credential.user!.uid)
           .set({
+            "imgLink":   urll     ,
             'username': usernameController.text,
             'age': ageController.text,
             "title": titleController.text,
@@ -141,6 +241,49 @@ class _RegisterState extends State<Register> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    Container(
+                    padding: EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color.fromARGB(125, 78, 91, 110),
+                    ),
+                    child: Stack(
+                      children: [
+                        imgPath == null
+                            ? CircleAvatar(
+                                backgroundColor:
+                                    Color.fromARGB(255, 225, 225, 225),
+                                radius: 71,
+                                // backgroundImage: AssetImage("assets/img/avatar.png"),
+                                backgroundImage:
+                                    AssetImage("assets/img/avatar.png"),
+                              )
+                            : ClipOval(
+                                child: Image.file(
+                                  imgPath!,
+                                  width: 145,
+                                  height: 145,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                        Positioned(
+                          left: 99,
+                          bottom: -10,
+                          child: IconButton(
+                            onPressed: () {
+                              // uploadImage2Screen();
+                              showmodel();
+                            },
+                            icon: const Icon(Icons.add_a_photo),
+                            color: Color.fromARGB(255, 94, 115, 128),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 33,
+                  ),
                     TextField(
                       controller: usernameController,
                         keyboardType: TextInputType.text,
